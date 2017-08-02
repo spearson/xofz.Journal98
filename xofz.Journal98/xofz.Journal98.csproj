@@ -35,7 +35,7 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="xofz.Core98">
-      <HintPath>..\..\..\Dropbox\Libraries\xofz.Core98\xofz.Core98.dll</HintPath>
+      <HintPath>C:\Dropbox\Libraries\xofz.Core98\xofz.Core98.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
