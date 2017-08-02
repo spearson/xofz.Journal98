@@ -40,7 +40,7 @@
             this.contentTextBox = new System.Windows.Forms.TextBox();
             this.submitKey = new System.Windows.Forms.Button();
             this.newKey = new System.Windows.Forms.Button();
-            this.statisticsUi = new UserControlStatisticsUi();
+            this.statisticsUi = new xofz.Journal98.UI.Forms.UserControlStatisticsUi();
             this.label1 = new System.Windows.Forms.Label();
             this.totalTimeLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.entriesGrid)).BeginInit();
@@ -215,7 +215,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.Name = "FormMainUi";
-            this.Text = "xofz.Journal";
+            this.Text = "xofz.Journal98";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.this_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.entriesGrid)).EndInit();
             this.ResumeLayout(false);
