@@ -141,6 +141,7 @@
             }
 
             this.currentEntry = currentEntry;
+            var w = this.web;
             var editable = currentEntry.CreatedTimestamp.Value.Date == DateTime.Today;
             var totalTime = TimeSpan.Zero;
             if (currentEntry.ModifiedTimestamp != null)
@@ -149,12 +150,8 @@
                     - currentEntry.CreatedTimestamp.Value;
             }
 
-            var formattedString = string.Format(
-                @"{0:00}\d\ {1:00}\h\ {2:00}\m\ {3:00}\s",
-                totalTime.Days,
-                totalTime.Hours,
-                totalTime.Minutes,
-                totalTime.Seconds);
+            var formattedString = w.Run<TimeSpanFormatter, string>(
+                f => f.Format(totalTime));
             UiHelpers.Write(this.ui, () => this.ui.TotalTime =
                 formattedString);
 
