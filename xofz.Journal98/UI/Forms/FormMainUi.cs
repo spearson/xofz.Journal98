@@ -41,11 +41,17 @@
 
             set
             {
+                if (value == default(JournalEntry))
+                {
+                    return;
+                }
+
                 this.createdTextBox.Text = value.CreatedTimestamp?
                     .ToString("yyyy/MM/dd hh:mm:ss tt");
                 this.modifiedTextBox.Text = value.ModifiedTimestamp?
                     .ToString("yyyy/MM/dd hh:mm:ss tt");
-                this.contentTextBox.Lines = MEHelpers.ToArray(value.Content);
+                this.contentTextBox.Lines = EnumerableHelpers.ToArray(
+                    value.Content);
             }
         }
 
@@ -69,7 +75,8 @@
                 this.entriesGrid.Rows.Clear();
                 foreach (var entry in value)
                 {
-                    var summary = MEHelpers.FirstOrDefault(entry.Content);
+                    var summary =
+                        EnumerableHelpers.FirstOrDefault(entry.Content);
                     summary = summary?.Substring(
                         0,
                         summary.Length > 50
@@ -86,26 +93,30 @@
 
         private void newKey_Click(object sender, EventArgs e)
         {
-            new Thread(() => this.NewKeyTapped?.Invoke()).Start();
+            ThreadPool.QueueUserWorkItem(
+                o => this.NewKeyTapped?.Invoke());
         }
 
         private void submitKey_Click(object sender, EventArgs e)
         {
-            new Thread(() => this.SubmitKeyTapped?.Invoke()).Start();
+            ThreadPool.QueueUserWorkItem(
+                o => this.SubmitKeyTapped?.Invoke());
         }
 
         private void searchResultsViewer_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex > -1 && e.RowIndex < this.entriesGrid.RowCount - 1)
             {
-                new Thread(() => this.EntrySelected?.Invoke(e.RowIndex)).Start();
+                ThreadPool.QueueUserWorkItem(
+                    o => this.EntrySelected?.Invoke(e.RowIndex));
             }
         }
 
         private void this_FormClosing(object sender, FormClosingEventArgs e)
         {
             e.Cancel = true;
-            new Thread(() => this.ShutdownRequested?.Invoke()).Start();
+            ThreadPool.QueueUserWorkItem(
+                o => this.ShutdownRequested?.Invoke());
         }
 
         private readonly Materializer materializer;

@@ -41,29 +41,47 @@
         public override void Start()
         {
             var w = this.web;
-            var entries = w.Run<
-                JournalEntryLoader,
-                IEnumerable<JournalEntry>>(
-                loader => loader.Load());
-            this.setAllEntries(
-                EnumerableHelpers.OrderByDescending(entries,
-                e => e.ModifiedTimestamp));
-            w.Run<EventRaiser>(er => er.Raise(this.ui, "EntrySelected", 0));
-            w.Run<xofz.Framework.Timer>(t => t.Start(1000), "HomeTimer");
+            w.Run<JournalEntryLoader>(loader =>
+            {
+                var entries = loader.Load();
+                this.setAllEntries(
+                    new ListMaterializedEnumerable<JournalEntry>(
+                        EnumerableHelpers.OrderByDescending(
+                            entries,
+                            e => e.ModifiedTimestamp)));
+            });
+
+            w.Run<EventRaiser>(er =>
+                er.Raise(
+                    this.ui,
+                    nameof(this.ui.EntrySelected),
+                    0));
+            w.Run<xofz.Framework.Timer>(t =>
+                {
+                    t.Start(1000);
+                },
+                "HomeTimer");
         }
 
         public override void Stop()
         {
             var w = this.web;
-            w.Run<xofz.Framework.Timer>(t => t.Stop(), "HomeTimer");
+            w.Run<xofz.Framework.Timer>(t =>
+                {
+                    t.Stop();
+                },
+                "HomeTimer");
         }
 
-        private void setAllEntries(OrderedMaterializedEnumerable<JournalEntry> allEntries)
+        private void setAllEntries(
+            ListMaterializedEnumerable<JournalEntry> allEntries)
         {
             this.allEntries = allEntries;
-            this.web.Run<JournalEntriesHolder>(holder => holder.Entries
-                = new OrderedMaterializedEnumerable<JournalEntry>(allEntries));
-            UiHelpers.Write(this.ui, () => this.ui.Entries = allEntries);
+            this.web.Run<JournalEntriesHolder>(
+                holder => holder.Entries = allEntries);
+            UiHelpers.Write(
+                this.ui,
+                () => this.ui.Entries = allEntries);
         }
 
         private void ui_NewKeyTapped()
@@ -73,10 +91,15 @@
             var current = UiHelpers.Read(this.ui, () => this.ui.CurrentEntry);
             if (editable && current.Content.Count > 0)
             {
-                var discardChanges = w.Run<Messenger, Response>(m => UiHelpers.Read(
-                    m.Subscriber,
-                    () => m.Question("Discard current changes?")));
-                if (discardChanges == Response.No)
+                var response = Response.No;
+                w.Run<Messenger>(m =>
+                {
+                    response = UiHelpers.Read(
+                        m.Subscriber,
+                        () => m.Question("Discard current changes?"));
+                });
+
+                if (response != Response.Yes)
                 {
                     return;
                 }
@@ -106,12 +129,14 @@
 
         private void ui_EntrySelected(int entryIndex)
         {
-            if (this.allEntries.Count - 1 < entryIndex)
+            var all = this.allEntries;
+            MaterializedEnumerable<JournalEntry> me = all;
+            if (me.Count - 1 < entryIndex)
             {
                 return;
             }
 
-            this.setCurrentEntry(this.allEntries[entryIndex]);
+            this.setCurrentEntry(all[entryIndex]);
         }
 
         private void timer_Elapsed()
@@ -150,10 +175,13 @@
                     - currentEntry.CreatedTimestamp.Value;
             }
 
-            var formattedString = w.Run<TimeSpanFormatter, string>(
-                f => f.Format(totalTime));
-            UiHelpers.Write(this.ui, () => this.ui.TotalTime =
-                formattedString);
+            w.Run<TimeSpanFormatter>(formatter =>
+            {
+                var formattedString = formatter.Format(totalTime);
+                UiHelpers.Write(
+                    this.ui,
+                    () => this.ui.TotalTime = formattedString);
+            });
 
             UiHelpers.Write(this.ui, () =>
             {
@@ -163,7 +191,7 @@
         }
 
         private int setupIf1;
-        private OrderedMaterializedEnumerable<JournalEntry> allEntries;
+        private ListMaterializedEnumerable<JournalEntry> allEntries;
         private JournalEntry currentEntry;
         private readonly HomeUi ui;
         private readonly MethodWeb web;

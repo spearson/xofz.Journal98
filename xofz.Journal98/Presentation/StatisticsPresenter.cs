@@ -51,45 +51,68 @@
         private void timer_Elapsed()
         {
             var w = this.web;
-            var entries = w.Run<JournalEntriesHolder,
-                MaterializedEnumerable<JournalEntry>>(holder => holder.Entries);
+            MaterializedEnumerable<JournalEntry> entries = null;
+            w.Run<JournalEntriesHolder>(holder =>
+            {
+                entries = holder.Entries;
+            });
+
+            if (entries == null)
+            {
+                return;
+            }
 
             var totalCount = entries.Count;
-            UiHelpers.Write(this.ui, () => this.ui.TotalCount = totalCount.ToString());
+            var tcString = totalCount.ToString();
+            UiHelpers.Write(
+                this.ui, 
+                () => this.ui.TotalCount = tcString);
 
             var now = DateTime.Now;
+            var countThisMonth = EnumerableHelpers.Count(
+                    entries,
+                    e => e.ModifiedTimestamp >=
+                         new DateTime(now.Year, now.Month, 1))
+                .ToString();
+            UiHelpers.Write(
+                this.ui, 
+                () => this.ui.CountThisMonth = countThisMonth);
 
-            var countThisMonth = MEHelpers.Count(
-                entries,
-                e => e.ModifiedTimestamp >=
-                     new DateTime(now.Year, now.Month, 1));
-            UiHelpers.Write(this.ui, () => this.ui.CountThisMonth = countThisMonth.ToString());
-
-            var countThisYear = MEHelpers.Count(
-                entries,
-                e => e.ModifiedTimestamp >=
-                     new DateTime(now.Year, 1, 1));
-            UiHelpers.Write(this.ui, () => this.ui.CountThisYear = countThisYear.ToString());
+            var countThisYear = EnumerableHelpers.Count(
+                    entries,
+                    e => e.ModifiedTimestamp >=
+                         new DateTime(now.Year, 1, 1))
+                .ToString();
+            UiHelpers.Write(
+                this.ui, 
+                () => this.ui.CountThisYear = countThisYear);
 
             if (totalCount == 0)
             {
-                var formattedZero = w.Run<TimeSpanFormatter, string>(
-                    f => f.Format(TimeSpan.Zero));
-                UiHelpers.Write(this.ui, () =>
+                w.Run<TimeSpanFormatter>(formatter =>
                 {
-                    this.ui.AvgTime = formattedZero;
-                    this.ui.AvgTimeThisMonth = formattedZero;
-                    this.ui.AvgTimeThisYear = formattedZero;
+                    var formattedZero = formatter.Format(TimeSpan.Zero);
+                    UiHelpers.Write(this.ui,
+                        () =>
+                        {
+                            this.ui.AvgTime = formattedZero;
+                            this.ui.AvgTimeThisMonth = formattedZero;
+                            this.ui.AvgTimeThisYear = formattedZero;
+                        });
                 });
                 return;
             }
 
             var totalTime = this.getTotalTime(entries);
             var avgTime = new TimeSpan(totalTime.Ticks / totalCount);
-            var formattedAvg = w.Run<TimeSpanFormatter, string>(
-                f => f.Format(avgTime));
-            UiHelpers.Write(this.ui, () => this.ui.AvgTime
-                = formattedAvg);
+            w.Run<TimeSpanFormatter>(formatter =>
+            {
+                var formattedAverage = formatter.Format(avgTime);
+                UiHelpers.Write(
+                    this.ui,
+                    () => this.ui.AvgTime = formattedAverage);
+            });
+            
 
             var entriesThisMonth = new LinkedList<JournalEntry>(
                 EnumerableHelpers.Where(
@@ -101,10 +124,15 @@
                 var timeThisMonth = this.getTotalTime(entriesThisMonth);
                 var avgTimeThisMonth = new TimeSpan(
                     timeThisMonth.Ticks / entriesThisMonth.Count);
-                var formattedAvgMonth = w.Run<TimeSpanFormatter, string>(
-                    f => f.Format(avgTimeThisMonth));
-                UiHelpers.Write(this.ui, () => this.ui.AvgTimeThisMonth
-                    = formattedAvgMonth);
+                w.Run<TimeSpanFormatter>(formatter =>
+                {
+                    var formattedAverageThisMonth =
+                        formatter.Format(avgTimeThisMonth);
+                    UiHelpers.Write(
+                        this.ui,
+                        () => this.ui.AvgTimeThisMonth =
+                            formattedAverageThisMonth);
+                });
             }
 
             var entriesThisYear = new LinkedList<JournalEntry>(
@@ -119,10 +147,15 @@
                 var timeThisYear = this.getTotalTime(entriesThisYear);
                 var avgTimeThisYear = new TimeSpan(
                     timeThisYear.Ticks / entriesThisYear.Count);
-                var formattedAvgYear = w.Run<TimeSpanFormatter, string>(
-                    f => f.Format(avgTimeThisYear));
-                UiHelpers.Write(this.ui, () => this.ui.AvgTimeThisYear
-                    = formattedAvgYear);
+                w.Run<TimeSpanFormatter>(formatter =>
+                {
+                    var formattedAverageThisYear =
+                        formatter.Format(avgTimeThisYear);
+                    UiHelpers.Write(
+                        this.ui,
+                        () => this.ui.AvgTimeThisYear =
+                            formattedAverageThisYear);
+                });
             }
         }
 

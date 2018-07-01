@@ -9,6 +9,7 @@
     using xofz.Presentation;
     using xofz.Root;
     using xofz.Root.Commands;
+    using xofz.UI;
     using xofz.UI.Forms;
 
     public class FormsBootstrapper
@@ -37,7 +38,8 @@
                 new FormMainUi(
                     new LinkedListMaterializer()));
             var mf = this.mainForm;
-            var fm = new FormsMessenger { Subscriber = mf };
+            Messenger fm = new FormsMessenger();
+            fm.Subscriber = mf;
 
             var e = this.executor;
             e.Execute(new SetupMethodWebCommand(fm));

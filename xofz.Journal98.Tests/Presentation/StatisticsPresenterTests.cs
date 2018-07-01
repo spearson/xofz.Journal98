@@ -56,7 +56,7 @@
 
                 p.Setup();
 
-                A.CallTo(() => w.Run(
+                A.CallTo(() => w.Run<xofz.Framework.Timer>(
                         A<xofz.Action<Timer>>.Ignored,
                         "StatisticsTimer"))
                     .MustHaveHappened();
@@ -81,7 +81,7 @@
             {
                 this.presenter.Start();
 
-                A.CallTo(() => this.timer.Start(A<int>.Ignored)).MustHaveHappened();
+                A.CallTo(() => this.timer.Start(A<long>.Ignored)).MustHaveHappened();
             }
 
             [Fact]

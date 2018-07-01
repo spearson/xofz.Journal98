@@ -215,7 +215,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.Name = "FormMainUi";
-            this.Text = "xofz.Journal98";
+            this.Text = "X of Z Journal98";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.this_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.entriesGrid)).EndInit();
             this.ResumeLayout(false);
